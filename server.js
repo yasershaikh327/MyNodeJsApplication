@@ -4,6 +4,8 @@ const port = process.env.PORT || 3000;
 // Install CORS first: npm install cors
 const cors = require('cors');
 app.use(cors()); // Enable Cross-Origin Requests
+// Serve static files (like index.html) from the 'public' directory
+app.use(express.static('public'));
 
 // This handles ALL requests to ANY path and sends "Hello World!"
 // Add this API endpoint
@@ -16,6 +18,12 @@ app.get('/api/message', (req, res) => {
   };
   // Send it as JSON
   res.json(dataFromServer);
+});
+
+
+// Add this route for the root URL '/'
+app.get('/', (req, res) => {
+  res.send('Welcome to my API! Go to /api/message to get data.');
 });
 
 app.listen(port, () => {
