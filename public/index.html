@@ -1,99 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Fetcher</title>
     <style>
-        body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f4f4;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
-
-    .container {
-        background-color: white;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
-
-    button {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 1rem;
-        margin-top: 1rem;
-    }
-
-    button:hover {
-        background-color: #0056b3;
-    }
-
-    #result {
-        margin-top: 2rem;
-        padding: 1rem;
-        background-color: #e9ecef;
-        border-radius: 4px;
-        font-family: monospace;
-    }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
+        button { 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #data-display {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: left;
+            display: inline-block;
+        }
     </style>
-    <script>
-        document.getElementById('getDateBtn').addEventListener('click', getDate);
-        function getDate() {
-            // Get the elements from the page
-            const resultDiv = document.getElementById('result');
-            const button = document.getElementById('getDateBtn');
-            
-            // Provide user feedback that something is happening
-            button.textContent = 'Loading...';
-            button.disabled = true;
-            resultDiv.innerHTML = '';
+</head>
+<body>
 
-            // Fetch data from your API
-            // The URL is relative because the HTML is served from the same Render domain
-            fetch('/api/date')
+    <h1>Data from API</h1>
+    <button onclick="fetchData()">Fetch Data from Server</button>
+
+    <div id="data-display">Click the button to load data.</div>
+
+    <script>
+        // This is the key function that calls your API
+        function fetchData() {
+            // Get the div where we will display the data
+            const displayDiv = document.getElementById('data-display');
+            
+            // Show a loading message
+            displayDiv.innerHTML = "<p>Loading... <br> (If this takes more than 30s, the server is waking up from sleep.)</p>";
+
+            // Get your API URL from Render
+            const apiUrl = 'https://your-api.onrender.com/api/message'; // <<< REPLACE with your actual Render URL
+
+            // Fetch data from the API
+            fetch(apiUrl)
                 .then(response => {
-                    // Check if the response is OK (status code 200-299)
+                    // Check if the request was successful
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        throw new Error('Network response was not ok');
                     }
+                    // Parse the JSON data from the response
                     return response.json();
                 })
                 .then(data => {
-                    // Display the result on the page
-                    resultDiv.innerHTML = `
-                        <strong>ISO Date:</strong> ${data.date} <br>
-                        <strong>Readable Date:</strong> ${data.readableDate}
+                    // We have the data! Now display it on the page.
+                    console.log("Data received:", data); // For debugging
+                    displayDiv.innerHTML = `
+                        <h3>Server Response:</h3>
+                        <p><strong>Message:</strong> ${data.message}</p>
+                        <p><strong>Timestamp:</strong> ${new Date(data.timestamp).toLocaleString()}</p>
+                        <p><strong>Status:</strong> ${data.status}</p>
                     `;
                 })
                 .catch(error => {
                     // Handle any errors that occurred during the fetch
-                    console.error('Error fetching the date:', error);
-                    resultDiv.innerHTML = `<p style="color: red;">Failed to get the date. Please check the console for errors.</p>`;
-                })
-                .finally(() => {
-                    // Re-enable the button regardless of success or failure
-                    button.textContent = 'Get Date & Time';
-                    button.disabled = false;
+                    console.error('There was a problem with the fetch operation:', error);
+                    displayDiv.innerHTML = `<p style="color: red;">Error fetching data: ${error.message}</p>`;
                 });
         }
     </script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Date & Time API Tester</title>
-</head>
-<body>
-    <div class="container">
-        <h1>Get the Current Date & Time</h1>
-        <p>Click the button below to fetch the time from the server.</p>
-        <button id="getDateBtn">Get Date & Time</button>
-        <div id="result"></div>
-    </div>
 </body>
 </html>
