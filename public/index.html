@@ -1,75 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Fetcher</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
-        button { 
-            padding: 10px 20px; 
-            font-size: 16px; 
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        #data-display {
-            margin-top: 20px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            text-align: left;
-            display: inline-block;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Student CRUD</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    input, button { padding: 8px; margin: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background: #f4f4f4; }
+  </style>
 </head>
 <body>
+  <h1>Student Management</h1>
 
-    <h1>Data from API</h1>
-    <button onclick="fetchData()">Fetch Data from Server</button>
+  <div>
+    <input type="text" id="firstname" placeholder="First Name" />
+    <input type="text" id="lastname" placeholder="Last Name" />
+    <input type="email" id="email" placeholder="Email" />
+    <button onclick="addStudent()">Add Student</button>
+  </div>
 
-    <div id="data-display">Click the button to load data.</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>First Name</th><th>Last Name</th><th>Email</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="student-table"></tbody>
+  </table>
 
-    <script>
-        // This is the key function that calls your API
-        function fetchData() {
-            // Get the div where we will display the data
-            const displayDiv = document.getElementById('data-display');
-            
-            // Show a loading message
-            displayDiv.innerHTML = "<p>Loading... <br> (If this takes more than 30s, the server is waking up from sleep.)</p>";
+  <script>
+    const API_URL = "https://your-render-url.onrender.com/api/students";
 
-            // Get your API URL from Render
-            const apiUrl = 'https://my-node-api-4c0h.onrender.com/api/message'; // <<< REPLACE with your actual Render URL
+    // Load all students
+    async function loadStudents() {
+      const res = await fetch(API_URL);
+      const students = await res.json();
+      const tbody = document.getElementById('student-table');
+      tbody.innerHTML = '';
+      students.forEach(s => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${s.id}</td>
+            <td>${s.firstname}</td>
+            <td>${s.lastname}</td>
+            <td>${s.email}</td>
+            <td>
+              <button onclick="deleteStudent(${s.id})">Delete</button>
+            </td>
+          </tr>`;
+      });
+    }
 
-            // Fetch data from the API
-            fetch(apiUrl)
-                .then(response => {
-                    // Check if the request was successful
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    // Parse the JSON data from the response
-                    return response.json();
-                })
-                .then(data => {
-                    // We have the data! Now display it on the page.
-                    console.log("Data received:", data); // For debugging
-                    displayDiv.innerHTML = `
-                        <h3>Server Response:</h3>
-                        <p><strong>Message:</strong> ${data.message}</p>
-                        <p><strong>Timestamp:</strong> ${new Date(data.timestamp).toLocaleString()}</p>
-                        <p><strong>Status:</strong> ${data.status}</p>
-                    `;
-                })
-                .catch(error => {
-                    // Handle any errors that occurred during the fetch
-                    console.error('There was a problem with the fetch operation:', error);
-                    displayDiv.innerHTML = `<p style="color: red;">Error fetching data: ${error.message}</p>`;
-                });
-        }
-    </script>
+    // Add student
+    async function addStudent() {
+      const firstname = document.getElementById('firstname').value;
+      const lastname = document.getElementById('lastname').value;
+      const email = document.getElementById('email').value;
+
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstname, lastname, email })
+      });
+
+      loadStudents();
+    }
+
+    // Delete student
+    async function deleteStudent(id) {
+      await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      loadStudents();
+    }
+
+    // Init
+    loadStudents();
+  </script>
 </body>
 </html>
