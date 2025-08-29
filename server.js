@@ -15,8 +15,8 @@ app.use(bodyParser.json());
 
 // PostgreSQL Connection Pool
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, // Render provides this
-  ssl: { rejectUnauthorized: false }
+    connectionString: "postgresql://nodejs_db_tzcg_user:1wHqBYUWBjERN3Achh5zHJn5hmIQrugN@dpg-d2orpemr433s73bafh2g-a.oregon-postgres.render.com/nodejs_db_tzcg",
+    ssl: { rejectUnauthorized: false }
 });
 
 // ---------- CRUD Routes ---------- //
